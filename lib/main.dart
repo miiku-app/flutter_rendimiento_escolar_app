@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:login_app/screens/home_screen.dart';
 import 'package:login_app/screens/login_screen.dart';
 import 'package:login_app/screens/parent/parent_home_screen.dart';
 import 'package:login_app/screens/student/student_home_screen.dart';
+import 'package:login_app/screens/teacher/teacher_home_screen.dart';
 
-import 'screens/teacher/teacher_home_screen.dart';
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 

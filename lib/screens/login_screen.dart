@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -8,25 +9,37 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  void _login(BuildContext context) {
-    String username = _usernameController.text;
-    String password = _passwordController.text;
-
-    if (username == 'admin' && password == '1234') {
-      Navigator.pushNamed(context, '/teacher_home', arguments: 'Profesor');
-    } else if (username == 'student' && password == '1234') {
-      Navigator.pushNamed(context, '/student_home', arguments: 'Estudiante');
-    } else if (username == 'parent' && password == '1234') {
-      Navigator.pushNamed(context, '/parent_home', arguments: 'Padre');
-    } else {
+  Future<void> _login(BuildContext context) async {
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+      final user = _auth.currentUser;
+      if (user != null) {
+        Navigator.pushReplacementNamed(context, '/home', arguments: user.email);
+      }
+    } on FirebaseAuthException catch (e) {
+      String message;
+      switch (e.code) {
+        case 'user-not-found':
+          message = 'No se encontró un usuario con ese email.';
+          break;
+        case 'wrong-password':
+          message = 'Contraseña incorrecta para ese usuario.';
+          break;
+        default:
+          message = 'Ocurrió un error. Por favor, inténtalo de nuevo.';
+      }
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Error de inicio de sesión'),
-          content: const Text('Usuario o contraseña incorrectos.'),
+          content: Text(message),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -35,6 +48,8 @@ class _LoginScreenState extends State<LoginScreen> {
           ],
         ),
       );
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -48,8 +63,8 @@ class _LoginScreenState extends State<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(labelText: 'Usuario'),
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
             TextField(
               controller: _passwordController,
