@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:login_app/providers/authentication_provider.dart';
 import 'package:login_app/screens/home_screen.dart';
 import 'package:login_app/screens/login_screen.dart';
 import 'package:login_app/screens/parent/parent_home_screen.dart';
@@ -8,8 +10,13 @@ import 'package:login_app/screens/teacher/teacher_home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(const MyApp());
+  await Firebase.initializeApp(); // Asegúrate de inicializar Firebase aquí
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => AuthenticationProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -24,11 +31,9 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
-        '/student_home': (context) =>
-            const StudentHomeScreen(username: 'Estudiante'),
-        '/parent_home': (context) => const ParentHomeScreen(username: 'Padre'),
-        '/teacher_home': (context) =>
-            const TeacherHomeScreen(username: 'Profesor'),
+        '/student_home': (context) => const StudentHomeScreen(),
+        '/parent_home': (context) => const ParentHomeScreen(),
+        '/teacher_home': (context) => const TeacherHomeScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/home') {
